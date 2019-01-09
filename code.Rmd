@@ -1,0 +1,100 @@
+---
+title: "predict the goose"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(fpp2)
+library(lubridate)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r getdata, echo=FALSE, message = FALSE,warning = FALSE}
+goose <- read_csv("data.csv")
+goose$date <- parse_date(goose$date, "%m/%d/%Y")
+gts <- msts(goose$cyclists,seasonal.periods=c(7,365.25),start=decimal_date(head(goose$date,n=1)))
+train <- subset(gts, end=length(gts)-14)
+test <- subset(gts, start=length(gts)-13)
+```
+
+## Plot the whole series and just 2018
+
+
+```{r goose, echo=FALSE, message = FALSE, warning = FALSE}
+p1 <- autoplot(gts)+ylab("cyclists") + xlab("Years")+ggtitle("Goose: All Data") 
+brs <- seq(decimal_date(ymd("2018-01-01")),(decimal_date(tail(goose$date,n=1))+7/365),7/365)#the breaks 
+lbs <- 0:(length(brs)-1)#break labels
+p2 <- autoplot(window(gts, start=2018)) + xlab("Weeks") +ylab("cyclists")+ggtitle("Goose: 2018")+ theme(axis.text.x=element_text(angle = -90))+ scale_x_continuous(breaks = brs,labels = lbs)
+gridExtra::grid.arrange(p1,p2)
+```
+
+## SLT Decomposition
+
+Of the whole series, assuming weekly and yearly seasonality.
+
+
+```{r stl, echo=FALSE}
+gts %>% mstl() %>% 
+  autoplot() 
+```
+
+## forecast based on stlf
+
+```{r goose-stlf, echo=FALSE}
+stlfor <- train %>%  stlf(h=14) 
+stlfor %>% autoplot(include=5*7) + xlab("Week")
+accuracy(stlfor, test)
+```
+
+## Check stlf residuals
+
+```{r stlresid, echo=FALSE}
+stlfor %>% checkresiduals()
+```
+
+## Forecast based on Dynamic harmonic regression
+
+```{r chooseKs, echo=FALSE}
+# rmse <- list()
+# for (i in seq(3)){
+#   for (j in seq(10)){
+#   fit <- auto.arima(train, xreg = fourier(train, K = c(i,j)),
+#     seasonal = FALSE, lambda = 0)
+#   forfit <- forecast(fit,xreg=fourier(train, K=c(i,j), h=14))
+#   rmse[[paste(i,j,sep=".")]] <-accuracy(forfit, test)["Test set","RMSE"]
+#   } 
+# }
+# rmse[which(min(unlist(rmse))==rmse)]
+```
+
+```{r fourier, echo=FALSE}
+ks <- c(2,2)
+fourmod <- auto.arima(train, seasonal=FALSE,xreg=fourier(train, K=ks),lambda = 0)
+fourfor <- fourmod %>% forecast(xreg=fourier(train, K=ks, h=14))
+fourfor %>% autoplot(include=35) + ylab("cyclists") + xlab("Weeks")
+accuracy(fourfor, test)
+```
+
+## check Dynamic harmonic regression residuals
+
+
+```{r fourresid, echo=FALSE}
+fourfor %>% checkresiduals()
+```
+
+## Combine the two forecasts
+
+```{r combine, echo=FALSE}
+combf <- (fourfor$mean+stlfor$mean)/2
+accuracy(combf,test)
+```
+
+```{r plots, echo=FALSE}
+  autoplot(tail(gts,n=49)) +
+  autolayer(stlfor, series="STL", PI=FALSE) +
+  autolayer(fourfor, series="Fourier", PI=FALSE) +
+  autolayer(combf, series="Combined") +
+  xlab("Year") + ylab("cyclists") +
+  ggtitle("Goose")
+```
