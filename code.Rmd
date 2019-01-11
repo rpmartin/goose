@@ -7,12 +7,15 @@ output: github_document
 library(tidyverse)
 library(fpp2)
 library(lubridate)
+library(timeDate)
+source("stathol.R")
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r getdata, echo=FALSE, message = FALSE,warning = FALSE}
 goose <- read_csv("data.csv")
 goose$date <- parse_date(goose$date, "%m/%d/%Y")
+goose$day=as.factor(weekdays(goose$date))
 tsstart <- c(year(goose$date[1]),as.numeric(format(goose$date[1], "%j")))
 gmts <- msts(goose$cyclists,seasonal.periods=c(7,365.25),start=tsstart)
 gts <- ts(goose$cyclists, frequency=365.25, start=tsstart)
@@ -20,8 +23,6 @@ trainms <- subset(gmts, end=length(gmts)-14)
 testms <- subset(gmts, start=length(gmts)-13)
 train <- subset(gts, end=length(gts)-14)
 test <- subset(gts, start=length(gts)-13)
-
-
 ```
 
 ## Plot the whole series and just 2018
@@ -51,11 +52,6 @@ gmts %>% mstl() %>%
 stlfor <- trainms %>%  stlf(h=14) 
 stlfor %>% autoplot(include=5*7) + xlab("Week")
 accuracy(stlfor, testms)
-```
-
-## Check stlf residuals
-
-```{r stlresid, echo=FALSE}
 stlfor %>% checkresiduals()
 ```
 
@@ -80,19 +76,46 @@ fourmod <- auto.arima(trainms, seasonal=FALSE,xreg=fourier(trainms, K=ks),lambda
 fourfor <- fourmod %>% forecast(xreg=fourier(trainms, K=ks, h=14))
 fourfor %>% autoplot(include=35) + ylab("cyclists") + xlab("Weeks")
 accuracy(fourfor, testms)
-```
-
-## check Dynamic harmonic regression residuals
-
-
-```{r fourresid, echo=FALSE}
 fourfor %>% checkresiduals()
 ```
 
-## Combine the two forecasts
+## forecast based on TBATS
+
+```{r goose-tbats, echo=FALSE}
+tbatsfit <- trainms %>%  tbats() 
+tbatsfor <- forecast(tbatsfit,h=14)
+tbatsfor %>% autoplot(include=5*7) + xlab("Week")
+accuracy(tbatsfor, testms)
+tbatsfor %>% checkresiduals()
+```
+
+## Deal with stat holidays
+```{r holi, echo=FALSE}
+#tsstartw <- c(year(goose$date[1]), as.numeric(format(goose$date[1], "%j")))
+y <- ts(goose$cyclists, frequency=7) 
+y <- subset(y, end=length(y)-14)
+z <- fourier(train, K=6)
+zf <- fourier(train, K=6, h=14)
+holiday <- select(stat.hol(goose$date[1],tail(goose$date,n=1)-days(14)),-date)
+holidayf <- select(stat.hol(tail(goose$date,n=1)-days(13),tail(goose$date,n=1)),-date)
+xr <- cbind(z,holiday)
+fit <- auto.arima(y, xreg=xr, seasonal=FALSE)
+fc <- forecast(fit, xreg=cbind(zf,holidayf), h=14)
+fc %>% autoplot(include=5*7) + xlab("Week")
+accuracy(unclass(fc$mean), unclass(test))
+fc %>% checkresiduals()
+
+```
+
+
+
+
+
+
+## Combine the forecasts
 
 ```{r combine, echo=FALSE}
-combf <- (fourfor$mean+stlfor$mean)/2
+combf <- (fourfor$mean+stlfor$mean+tbatsfor$mean+unclass(fc$mean))/4
 accuracy(combf,testms)
 ```
 
@@ -100,6 +123,8 @@ accuracy(combf,testms)
   autoplot(tail(gmts,n=49)) +
   autolayer(stlfor, series="STL", PI=FALSE) +
   autolayer(fourfor, series="Fourier", PI=FALSE) +
+  autolayer(tbatsfor, series="TBATS", PI=FALSE) +
+ # autolayer(fc$mean, series="holi", PI=FALSE) +
   autolayer(combf, series="Combined") +
   xlab("Year") + ylab("cyclists") +
   ggtitle("Goose")

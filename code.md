@@ -25,10 +25,7 @@ forecast based on stlf
     ## Training set 0.1230271        NA
     ## Test set     0.5073740 0.7646251
 
-Check stlf residuals
---------------------
-
-![](code_files/figure-markdown_github/stlresid-1.png)
+![](code_files/figure-markdown_github/goose-stlf-2.png)
 
     ## 
     ##  Ljung-Box test
@@ -50,10 +47,7 @@ Forecast based on Dynamic harmonic regression
     ## Training set 0.1849538        NA
     ## Test set     0.1319632 0.5857492
 
-check Dynamic harmonic regression residuals
--------------------------------------------
-
-![](code_files/figure-markdown_github/fourresid-1.png)
+![](code_files/figure-markdown_github/fourier-2.png)
 
     ## 
     ##  Ljung-Box test
@@ -63,10 +57,54 @@ check Dynamic harmonic regression residuals
     ## 
     ## Model df: 10.   Total lags used: 279.2
 
-Combine the two forecasts
--------------------------
+forecast based on TBATS
+-----------------------
 
-    ##                ME     RMSE      MAE      MPE    MAPE      ACF1 Theil's U
-    ## Test set 86.22325 329.3824 295.7657 2.608127 15.8108 0.4166697 0.6046255
+![](code_files/figure-markdown_github/goose-tbats-1.png)
+
+    ##                      ME     RMSE      MAE      MPE     MAPE      MASE
+    ## Training set   9.205277 333.8080 254.3901 -8.79447 24.41390 0.5414724
+    ## Test set     321.993898 417.4721 369.0865 13.13185 17.33003 0.7856049
+    ##                      ACF1 Theil's U
+    ## Training set -0.001343788        NA
+    ## Test set      0.258109639 0.7363362
+
+![](code_files/figure-markdown_github/goose-tbats-2.png)
+
+    ## 
+    ##  Ljung-Box test
+    ## 
+    ## data:  Residuals from TBATS(1, {3,1}, -, {<7,2>, <365.25,6>})
+    ## Q* = 363.42, df = 249.2, p-value = 3.048e-06
+    ## 
+    ## Model df: 30.   Total lags used: 279.2
+
+Deal with stat holidays
+-----------------------
+
+    ## Note: method with signature 'timeDate#numeric' chosen for function '-',
+    ##  target signature 'timeDate#Period'.
+    ##  "ANY#Period" would also be valid
+
+![](code_files/figure-markdown_github/holi-1.png)
+
+    ##                ME     RMSE     MAE      MPE     MAPE      ACF1 Theil's U
+    ## Test set 204.7914 535.5297 447.265 3.894603 24.40478 0.4536747  1.009078
+
+![](code_files/figure-markdown_github/holi-2.png)
+
+    ## 
+    ##  Ljung-Box test
+    ## 
+    ## data:  Residuals from Regression with ARIMA(5,1,1) errors
+    ## Q* = 327.95, df = 3, p-value < 2.2e-16
+    ## 
+    ## Model df: 28.   Total lags used: 31
+
+Combine the forecasts
+---------------------
+
+    ##                ME     RMSE      MAE      MPE     MAPE      ACF1 Theil's U
+    ## Test set 174.8079 354.4214 305.3499 5.560677 16.01827 0.3849775  0.660883
 
 ![](code_files/figure-markdown_github/plots-1.png)
