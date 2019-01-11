@@ -79,8 +79,8 @@ forecast based on TBATS
     ## 
     ## Model df: 30.   Total lags used: 279.2
 
-Deal with stat holidays
------------------------
+Arima with fourier for annual and holiday dummies
+-------------------------------------------------
 
     ## Note: method with signature 'timeDate#numeric' chosen for function '-',
     ##  target signature 'timeDate#Period'.
@@ -88,8 +88,12 @@ Deal with stat holidays
 
 ![](code_files/figure-markdown_github/holi-1.png)
 
-    ##                ME     RMSE     MAE      MPE     MAPE      ACF1 Theil's U
-    ## Test set 204.7914 535.5297 447.265 3.894603 24.40478 0.4536747  1.009078
+    ##                      ME     RMSE      MAE        MPE     MAPE      MASE
+    ## Training set   1.720426 388.2511 294.9296 -11.490982 27.74386 0.7796668
+    ## Test set     204.791378 535.5297 447.2650   3.894603 24.40478 1.1823760
+    ##                     ACF1 Theil's U
+    ## Training set -0.03849532        NA
+    ## Test set      0.45367469  1.009078
 
 ![](code_files/figure-markdown_github/holi-2.png)
 
@@ -105,6 +109,4 @@ Combine the forecasts
 ---------------------
 
     ##                ME     RMSE      MAE      MPE     MAPE      ACF1 Theil's U
-    ## Test set 174.8079 354.4214 305.3499 5.560677 16.01827 0.3849775  0.660883
-
-![](code_files/figure-markdown_github/plots-1.png)
+    ## Test set 211.2991 404.4188 312.9664 8.180351 14.37878 0.2756185  0.679276
