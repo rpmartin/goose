@@ -82,31 +82,29 @@ forecast based on TBATS
 Arima with fourier for annual and holiday dummies
 -------------------------------------------------
 
-    ## Note: method with signature 'timeDate#numeric' chosen for function '-',
-    ##  target signature 'timeDate#Period'.
-    ##  "ANY#Period" would also be valid
-
 ![](code_files/figure-markdown_github/holi-1.png)
 
-    ##                      ME     RMSE      MAE        MPE     MAPE      MASE
-    ## Training set   1.720426 388.2511 294.9296 -11.490982 27.74386 0.7796668
-    ## Test set     204.791378 535.5297 447.2650   3.894603 24.40478 1.1823760
-    ##                     ACF1 Theil's U
-    ## Training set -0.03849532        NA
-    ## Test set      0.45367469  1.009078
+    ##                      ME     RMSE      MAE       MPE     MAPE      MASE
+    ## Training set   1.470022 333.8079 256.5973 -9.762581 24.82407 0.6783327
+    ## Test set     270.181435 363.6535 320.9106 12.392281 15.82795 0.8483493
+    ##                    ACF1 Theil's U
+    ## Training set 0.07888808        NA
+    ## Test set     0.35149235 0.7012657
 
 ![](code_files/figure-markdown_github/holi-2.png)
 
     ## 
     ##  Ljung-Box test
     ## 
-    ## data:  Residuals from Regression with ARIMA(5,1,1) errors
-    ## Q* = 327.95, df = 3, p-value < 2.2e-16
+    ## data:  Residuals from Regression with ARIMA(0,0,1)(0,1,1)[7] errors
+    ## Q* = 130.88, df = 3, p-value < 2.2e-16
     ## 
-    ## Model df: 28.   Total lags used: 31
+    ## Model df: 17.   Total lags used: 20
 
 Combine the forecasts
 ---------------------
 
-    ##                ME     RMSE      MAE      MPE     MAPE      ACF1 Theil's U
-    ## Test set 211.2991 404.4188 312.9664 8.180351 14.37878 0.2756185  0.679276
+    ##                ME     RMSE      MAE      MPE    MAPE      ACF1 Theil's U
+    ## Test set 191.1555 332.2845 296.1437 7.685097 15.0722 0.3769435 0.6222585
+
+![](code_files/figure-markdown_github/plots-1.png)

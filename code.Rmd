@@ -94,23 +94,18 @@ tbatsfor %>% checkresiduals()
 ```
 
 ## Arima with fourier for annual and holiday dummies
-```{r holi, echo=FALSE}
-z <- fourier(a.train, K=6)
-zf <- fourier(a.train, K=6, h=14)
+```{r holi, echo=FALSE,warning=FALSE,message=FALSE}
+z <- fourier(a.train, K=2)
+zf <- fourier(a.train, K=2, h=14)
 holiday <- select(stat.hol(goose$date[1],tail(goose$date,n=1)-days(14)),-date)
 holidayf <- select(stat.hol(tail(goose$date,n=1)-days(13),tail(goose$date,n=1)),-date)
 xr <- cbind(z,holiday)
-four.dum.mod <- auto.arima(w.train, xreg=xr, seasonal=FALSE)
+four.dum.mod <- auto.arima(w.train, xreg=xr, seasonal=TRUE)
 four.dum.for <- forecast(four.dum.mod, xreg=cbind(zf,holidayf), h=14)
 four.dum.for %>% autoplot(include=5*7) + xlab("Week")
 accuracy(four.dum.for, w.test)
 four.dum.for %>% checkresiduals()
 ```
-
-
-
-
-
 
 ## Combine the forecasts
 
@@ -120,9 +115,18 @@ stlfor$mean <- ts(stlfor$mean, frequency=365.25, start = c(2018, 288))
 fourfor$mean <- ts(fourfor$mean, frequency=365.25, start = c(2018, 288))
 tbatsfor$mean <- ts(tbatsfor$mean, frequency=365.25, start = c(2018, 288))
 combf <- (fourfor$mean+stlfor$mean+tbatsfor$mean+four.dum.for$mean)/4
-accuracy(combf,w.a.test)
+accuracy(combf,unclass(a.test))
 ```
 
-```{r plots, echo=FALSE}
+```{r plots, echo=FALSE,warning=FALSE,message=FALSE}
+end.of.series <- ts(subset(a.seas, start=length(a.seas)-(13+21)),start=c(2018, 288-21),frequency=365.25)
+autoplot(end.of.series)+
+  autolayer(four.dum.for$mean, series="Arima+Fourier+Dummies")+
+  autolayer(stlfor$mean,series="STL Decomp")+
+  autolayer(fourfor$mean,series="Arima+Fourier")+
+  autolayer(tbatsfor$mean,series="TBATS")+
+  autolayer(combf,series="Combined")+
+  xlab("Time")+ylab("cyclists")+ggtitle("Goose")+
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5),labels = NULL, minor_breaks = NULL) 
 
 ```
