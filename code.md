@@ -79,17 +79,17 @@ forecast based on TBATS
     ## 
     ## Model df: 30.   Total lags used: 279.2
 
-Arima with fourier for annual and holiday dummies
--------------------------------------------------
+Arima with fourier for annual, holiday dummies and weather
+----------------------------------------------------------
 
 ![](code_files/figure-markdown_github/holi-1.png)
 
     ##                      ME     RMSE      MAE       MPE     MAPE      MASE
-    ## Training set   1.470022 333.8079 256.5973 -9.762581 24.82407 0.6783327
-    ## Test set     270.181435 363.6535 320.9106 12.392281 15.82795 0.8483493
+    ## Training set   2.822907 274.0447 206.9219 -5.841325 19.23779 0.5470123
+    ## Test set     121.677585 302.7118 261.6898  4.199412 13.78106 0.6917950
     ##                    ACF1 Theil's U
-    ## Training set 0.07888808        NA
-    ## Test set     0.35149235 0.7012657
+    ## Training set 0.04687521        NA
+    ## Test set     0.49658124 0.5579969
 
 ![](code_files/figure-markdown_github/holi-2.png)
 
@@ -97,14 +97,14 @@ Arima with fourier for annual and holiday dummies
     ##  Ljung-Box test
     ## 
     ## data:  Residuals from Regression with ARIMA(0,0,1)(0,1,1)[7] errors
-    ## Q* = 130.88, df = 3, p-value < 2.2e-16
+    ## Q* = 100.95, df = 3, p-value < 2.2e-16
     ## 
-    ## Model df: 17.   Total lags used: 20
+    ## Model df: 20.   Total lags used: 23
 
 Combine the forecasts
 ---------------------
 
-    ##                ME     RMSE      MAE      MPE    MAPE      ACF1 Theil's U
-    ## Test set 191.1555 332.2845 296.1437 7.685097 15.0722 0.3769435 0.6222585
+    ##                ME     RMSE      MAE     MPE     MAPE      ACF1 Theil's U
+    ## Test set 154.0295 318.5963 278.5882 5.63688 14.42109 0.4147092 0.5898865
 
 ![](code_files/figure-markdown_github/plots-1.png)

@@ -16,6 +16,20 @@ knitr::opts_chunk$set(echo = FALSE)
 goose <- read_csv("data.csv")
 goose$date <- parse_date(goose$date, "%m/%d/%Y")
 goose$day=as.factor(weekdays(goose$date))
+holiday <- stat.hol(goose$date[1],tail(goose$date,n=1))
+goose <- left_join(goose,holiday)                 
+wfiles =list.files(pattern="^weather")
+wlist=list()
+get.data <- function(name){
+  x <- read_csv(name,skip=24,col_names = TRUE) 
+  x=x[,c(1,6,8,20)]
+  return(x)
+}
+wlist <- lapply(wfiles,get.data)
+weather <- do.call(rbind, wlist)
+colnames(weather) <- c("date","max","min","precip")
+goose <- left_join(goose,weather)
+goose$precip[is.na(goose$precip)] <- 0
 start.day <- c(year(goose$date[1]),as.numeric(format(goose$date[1], "%j")))
 start.week <- c(isoweek(goose$date[1]),wday(goose$date[1],label=FALSE))
 w.a.seas <- msts(goose$cyclists,seasonal.periods=c(7,365.25),start=start.day)
@@ -93,15 +107,21 @@ accuracy(tbatsfor, w.a.test)
 tbatsfor %>% checkresiduals()
 ```
 
-## Arima with fourier for annual and holiday dummies
+## Arima with fourier for annual, holiday dummies and weather
 ```{r holi, echo=FALSE,warning=FALSE,message=FALSE}
 z <- fourier(a.train, K=2)
 zf <- fourier(a.train, K=2, h=14)
-holiday <- select(stat.hol(goose$date[1],tail(goose$date,n=1)-days(14)),-date)
-holidayf <- select(stat.hol(tail(goose$date,n=1)-days(13),tail(goose$date,n=1)),-date)
-xr <- cbind(z,holiday)
+xrtrain <-goose[1:(nrow(goose)-14),4:16]
+xrtest <- goose[(nrow(goose)-13):nrow(goose),c(4:16)]
+#using realized weather for forecast: overwrite with the means for the forecast period
+xrtest$max <- mean(xrtest$max)
+xrtest$min <- mean(xrtest$min)
+xrtest$precip <- mean(xrtest$precip)
+
+xr <- cbind(z,xrtrain)
+xrf <- cbind(zf,xrtest)
 four.dum.mod <- auto.arima(w.train, xreg=xr, seasonal=TRUE)
-four.dum.for <- forecast(four.dum.mod, xreg=cbind(zf,holidayf), h=14)
+four.dum.for <- forecast(four.dum.mod, xreg=xrf, h=14)
 four.dum.for %>% autoplot(include=5*7) + xlab("Week")
 accuracy(four.dum.for, w.test)
 four.dum.for %>% checkresiduals()
