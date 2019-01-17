@@ -135,13 +135,14 @@ stlfor$mean <- ts(stlfor$mean, frequency=365.25, start = c(2018, 288))
 fourfor$mean <- ts(fourfor$mean, frequency=365.25, start = c(2018, 288))
 tbatsfor$mean <- ts(tbatsfor$mean, frequency=365.25, start = c(2018, 288))
 combf <- (fourfor$mean+stlfor$mean+tbatsfor$mean+four.dum.for$mean)/4
+#combf <- (fourfor$mean+four.dum.for$mean)/2 #the best two
 accuracy(combf,unclass(a.test))
 ```
 
 ```{r plots, echo=FALSE,warning=FALSE,message=FALSE}
 end.of.series <- ts(subset(a.seas, start=length(a.seas)-(13+21)),start=c(2018, 288-21),frequency=365.25)
 autoplot(end.of.series)+
-  autolayer(four.dum.for$mean, series="Arima+Fourier+Dummies")+
+  autolayer(four.dum.for$mean, series="Arima+Fourier+Regressors")+
   autolayer(stlfor$mean,series="STL Decomp")+
   autolayer(fourfor$mean,series="Arima+Fourier")+
   autolayer(tbatsfor$mean,series="TBATS")+
