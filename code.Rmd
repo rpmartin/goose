@@ -9,6 +9,7 @@ library(fpp2)
 library(lubridate)
 library(timeDate)
 source("stathol.R")
+source("wthrfcst.R")
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -117,6 +118,10 @@ xrtest <- goose[(nrow(goose)-13):nrow(goose),c(4:16)]
 xrtest$max <- mean(xrtest$max)
 xrtest$min <- mean(xrtest$min)
 xrtest$precip <- mean(xrtest$precip)
+#wfcst <- get.fcast() #this will get the 14 weather forecast from weather network
+#xrtest$max <- wfcst$Max
+#xrtest$min <- wfcst$Min
+#xrtest$precip <- wfcst$Rain
 
 xr <- cbind(z,xrtrain)
 xrf <- cbind(zf,xrtest)
